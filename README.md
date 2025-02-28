@@ -1,6 +1,9 @@
 # Class_Reproducibility_Asssignments
 This repository is for class assignments
 
+# DOI
+[![DOI](https://zenodo.org/badge/940768871.svg)](https://doi.org/10.5281/zenodo.14947900)
+
 ### Link to Coding Challenge 4
 
 - [CodingChallenge4](CodingChallenge4/R-Markdown-Assignment.md)

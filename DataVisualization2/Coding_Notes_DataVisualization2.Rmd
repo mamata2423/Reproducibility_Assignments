@@ -1,0 +1,180 @@
+---
+title: "Coding notes for Advanced Data Visualization"
+author: "Mamata K C"
+date: "2025-02-19"
+output: pdf_document
+---
+```{r}
+#loading packages
+library(tidyverse)
+library(ggpubr)
+library(ggrepel)
+
+#loading color-blind palette
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+#loading data in R
+sample.data.bac <- read.csv("BacterialAlpha.csv", na.strings = "na")
+sample.data.bac
+
+#coding time-point and crop as factor (because we don't want it to be treated as continuous variable)
+sample.data.bac$Time_Point <- as.factor(sample.data.bac$Time_Point)
+sample.data.bac$Crop <- as.factor(sample.data.bac$Crop)
+
+#viewing the structure of data
+str(sample.data.bac)
+
+#changing the order of treatments to be plotted (default of ggplot is alphabetical order)
+sample.data.bac$Crop <- factor (sample.data.bac$Crop, levels = c("Soil", "Cotton", "Soybean"))
+
+#plotting boxplot 
+
+#Plot 1 - Bacterial Evenness
+
+bac.even <- ggplot(sample.data.bac, aes(x=Time_Point, y= even, color= Crop)) +   #Timepoint as x axis and evenness as y axis and color according to crop
+  geom_boxplot(position = position_dodge()) +    #making boxplots side by side without overlapping
+  geom_point(position = position_jitterdodge(0.05)) +   #filling the data points in boxplot without overlapping
+  xlab("Time") +    #labelling X axis
+  ylab("Pielou's evenness") +    #labelling Y axis
+  scale_color_manual(values = cbbPalette) +   #choosing colorblind palette for colors of boxplot and datapoints
+  theme_classic()  #making the background of plot uniform/white
+bac.even
+```
+
+
+```{r}
+#Plot 2 - A
+
+#subsetting data to exclude soil data
+sample.data.bac.no.soil <- subset(sample.data.bac, Crop!= "Soil")
+sample.data.bac.no.soil
+
+water.imbibed <- ggplot(sample.data.bac.no.soil, aes(Time_Point, 1000 * Water_Imbibed, color = Crop)) + #defining aesthetics: x axis as time point and y axis as water imbibed and color by crop. Also converting the unit of y from grams to milligrams. 
+  geom_jitter(width = 0.5, alpha = 0.5) + #adding jitter points with transparency to show individual data points
+  stat_summary(fun = mean, geom = "line", aes(group = Crop)) + #adding lines to represent the mean value for each crop group
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) + #adding error bars to represent the standard error of the mean
+  xlab("Hours post sowing") + #labelling x axis
+  ylab("Water Imbibed (mg)") + #labelling y axis
+  scale_color_manual(values = c(cbbPalette[[2]], cbbPalette[[3]]), name = "", labels = c("", "")) + #setting color for crop variable manually
+  theme_classic() + #using classic theme for the plot to make background plain white
+  theme(strip.background = element_blank(), legend.position = "none") + #costumizing theme to remore strip background  and position legend to none
+  facet_wrap(~Crop, scales = "free") #creating separate panels for each crop and allowing free scales
+water.imbibed
+```
+
+```{r}
+#Plot 3 -C
+
+water.imbibed.cor <- ggplot(sample.data.bac.no.soil, aes (y= even, x = 1000 * Water_Imbibed, color = Crop))+ #defining aesthetics: x axis as water imbibed and y axis as evenness and color by crop. Also converting the unit of y from grams to milligrams. 
+  geom_point(aes(shape = Time_Point)) + #adding points with different shapes based on time points
+  geom_smooth(se=FALSE, method = lm) +  #adding a linear model smooth line without confidence interval
+  xlab("Water Imbibed (mg)") + #labelling x axis
+  ylab("Pielou's evenness") + #labelling y axis
+  scale_color_manual(values = c(cbbPalette[[2]], cbbPalette[[3]]), name = "", labels = c("", "")) + #setting color for crop variable manually
+  theme_classic() + #using classic theme for the plot to make background plain white 
+  guides(color = "none") +
+  theme(strip.background = element_blank(), legend.posion = "right") + #costumizing theme to remore strip background  and position legend to right
+  facet_wrap(~Crop, scales = "free") #creating separate panels for each crop and allowing free scales
+water.imbibed.cor
+  
+```
+```{r}
+#Combining multiple figures into a single figure
+
+figure2 <- ggarrange( 
+  water.imbibed, #first figure to plot
+  bac.even,  #second figure to plot 
+  water.imbibed.cor,  #third figure to plot
+  labels = "auto", #automatically labelling the plots as A, B ,C
+  nrow = 3, #Arranging plots vertically in 3 rows
+  ncol = 1, #Arranging plots in single column
+  legend = FALSE #not including legend in the combined figure
+)
+figure2
+```
+```{r}
+#ggpubr can integrate statistics in plot
+# integrating statistics into plots for exploratory analyses
+
+
+#applying anova to the groups
+bac.even +
+  stat_compare_means(method = "anova")
+
+#comparison within crop group at a single time point
+bac.even +
+  geom_pwc(aes(group = Crop), method = "t.test", label = "p.adj.format" )  
+  geom_pwc(aes(group = Crop), method = "t.test", label = "p.adj.signif" ) #denoting significance levels with pvalues
+
+
+bac.even +
+  geom_pwc(aes(group = Crop), method = "t.test", label = "p.adj.signif" ) #denoting significance levels with *
+
+
+bac.even +
+  geom_pwc(aes(group = Crop), method = "t.test", label = "{p.adj.signif}{p.adj.format}" ) #denoting significance levels with * and pvalues
+
+
+#comparison between time point (average evenness of all crops at certain time point compared with average evenness of all crop at another time point)
+bac.even +
+  geom_pwc(aes(group = Time_Point), method = "t.test", label = "p.adj.format" )
+
+```
+
+```{r}
+#correlation
+water.imbibed.cor +
+  stat_cor()  #gives pearson's correlation
+
+water.imbibed.cor +
+  stat_regline_equation() #gives regression line
+
+water.imbibed.cor +
+  stat_cor(label.y = 0.7) +
+  stat_regline_equation()
+```
+```{r}
+#Differential abundance test for plotting while emphasizing most significant points
+diff_abundance <- read.csv("diff_abund.csv") #loading data in R
+
+str(diff_abundance) 
+
+diff_abundance$log10_pvalue <- -log10(diff_abundance$p_CropSoybean)  #adding column log10_pvalue in the data with log10 value for p values of cropsoybean
+
+diff_abundance_label <- diff_abundance[diff_abundance$log10_pvalue>30,] #subsetting the dataset with log10 pvalue greater than 30
+
+ggplot() +
+  geom_point(data = diff_abundance, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean)) + #defining x as lfc cropsoybean ans y as log10 pvalue and color by diff cropsoybean
+  theme_classic()   #using classic theme for the plot to make background plain white 
+
+ggplot() +
+  geom_point(data = diff_abundance, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean)) +  #defining x as lfc cropsoybean ans y as log10 pvalue and color by diff cropsoybean
+  theme_classic() +     #using classic theme for the plot to make background plain white 
+  geom_text_repel(data = diff_abundance_label, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean, label = Label))   #geom_text_repel adding labels without overlapping the labels with each other and data points #label with any column name
+
+#using all data points 
+ggplot() +
+  geom_point(data = diff_abundance, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean)) + #defining x as lfc cropsoybean ans y as log10 pvalue and color by diff cropsoybean
+  theme_classic() + #using classic theme for the plot to make background plain white
+  geom_text_repel(data = diff_abundance, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean, label = Label))  #geom_text_repel adding labels without overlapping the labels with each other and data points
+
+volcano <- ggplot() + 
+  geom_point(data = diff_abundance, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean)) + 
+  geom_text_repel(data = diff_abundance_label, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean, label = Label)) + 
+  scale_color_manual(values = cbbPalette, name = "Significant") +
+  theme_classic() + 
+  xlab("Log fold change Soil vs. Soybean") +
+  ylab("-log10 p-value")
+volcano
+
+#using the same concept to emphasize only certain points as a different color and shape
+ggplot() +
+  geom_point(data = diff_abundance, aes(x = lfc_CropSoybean, y = log10_pvalue)) + #defining x as lfc cropsoybean ans y as log10 pvalue 
+  geom_point(data = diff_abundance_label, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean), shape = 17, color = "salmon", size = 4) + #defining x as lfc cropsoybean ans y as log10 pvalue and also using different color, shape and size for certain subsetted group
+  theme_classic() +
+  geom_text_repel(data = diff_abundance_label, aes(x = lfc_CropSoybean, y = log10_pvalue, color = diff_CropSoybean, label = Label), color = "orange") +
+  scale_color_manual(values = cbbPalette, name = "Significant") +
+  xlab("Log fold change soil vs soybean") +
+  ylab("-log10 pvlaue")
+```
+

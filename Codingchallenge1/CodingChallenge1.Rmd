@@ -1,0 +1,135 @@
+---
+title: "Coding challenge 1"
+author: "Mamata K C"
+date: "2025-02-06"
+output: pdf_document
+---
+
+Introduction to R – 25 pts
+
+This assignment is intended to introduce you to R, RStudio, and integration with GitHub, as well as help you practice some R coding. You may work in pairs. When submitting the assignment on Canvas, please put both names on the assignment. 
+
+
+1.	5 pts. Explain the following things about R and Rstudio: 
+
+o	Where do you type code? 
+
+We type code in the top left portion of the R studio (script editor). We can also type code in the console.
+
+o	Where is the output of the code? 
+
+The output will appear in the console (bottom left pane of R studio)
+
+o	Where do plots show up? 
+
+Plots will show up in the bottom right pane of R studio in the plots tab.
+
+o	What is a global environment? 
+
+A global environment lies in the top right pane of the R studio. It stores all the variables, data frames, and objects that we create in R and we can view it in the environment tab. 
+
+o	How do you get help for a function through R Studio? 
+
+To get help for a function through R Studio, we use help(name of function) or use help tab in the bottom right pane of R Studio.
+
+o	What is an R package? 
+
+R package consists of many functions from different places and the R package can be downloaded from repositories. The default repository is CRAN where most of the R packages are available and can be downloaded using code install.packages(name of package).
+ 
+o	What is a function? 
+
+A function is a code to perform certain tasks in R.
+
+o	How do you find the installed and loaded packages? 
+
+To find installed and loaded packages you can go to the tab packages on the bottom left pane of R studio. If a certain package exists there and is checked then it is installed and loaded and if the package exists but is unchecked that means the package is installed but not loaded.
+
+o	What is a working directory, and how do you find it? 
+
+A working directory is a place or folder where you have been working and from where your files can be read and will be saved.
+To find a working directory, we use the function getwd() 
+
+o	What is a relative file path and how is it different than an absolute file path? 
+
+Relative file path is the path of the file from your working directory whereas the absolute file path is the complete file path from root.
+
+2.	2 pts. Explain the steps to start a new R project connected to a GitHub repository.
+
+Go to file > click on New Project > Version Control > Git > copy-paste your GitHub repository URL and name the project and browse and set the correct folder > create
+
+3.	3 pts. Please explain the different data classes and how they are similar and different from each other. 
+
+o	Vector: a one-dimensional collection of elements and all the elements should be of the same data type either numeric, character, or logical.
+
+o	Dataframe: a two-dimensional collection of elements and different columns could have a different data type however within the column the datatype should be the same.
+
+o	Matrix: a two-dimensional collection of elements but all the elements should be of the same data type.
+
+
+
+
+4.	10 pts. Complete all tasks in an R script and push it to GitHub.
+
+o	Create a vector named 'z' with the values 1 to 200
+o	Print the mean and standard deviation of z on the console
+o	Create a logical vector named zlog that is 'TRUE' for z values greater than 30 and 'FALSE' otherwise.
+o	Make a dataframe with z and zlog as columns. Name the dataframe zdf
+o	Change the column names in your new dataframe to equal “zvec” and “zlogic”
+o	Make a new column in your dataframe equal to zvec squared (i.e., z2). Call the new column zsquared. 
+o	Subset the dataframe with and without the subset() function to only include values of zsquared greater than 10 and less than 100 
+o	Subset the zdf dataframe to only include the values on row 26
+o	Subset the zdf dataframe to only include the values in the column zsquared in the 180th row.
+o	Annotate your code, commit the changes and push it to your GitHub
+
+```{r}
+#To create a vector named 'z' with the values 1 to 200.
+z<-1:200  
+z
+
+#To print the mean and standard deviation of z
+mean(z)
+sd(z)
+
+#To create a logical vector named zlog that is 'TRUE' for z values and 'FALSE' otherwise.
+zlog<-z>30
+zlog
+
+#To make a dataframe with z and zlog as columns.Name the dataframe zdf
+zdf<-data.frame(z,zlog)
+zdf
+
+#To change the column names in your new dataframe to equal "zvec" and "zlogic"
+colnames(zdf)<-c("zvec","zlogic")
+zdf
+
+#To make a new column names in your dataframe equal to zvec squared (i.e, z^2). Call the new column zsquared.
+zdf$zsquared<-(zdf$zvec^2)
+zdf
+
+#To subset the dataframe with the subset() function to only include values of zsquared greater than 10 and less than 100 
+subset(zdf,zsquared>10 & zsquared<100)
+
+#To subset the dataframe without the subset() function to only include values of zsquared greater than 10 and less than 100
+zdf[zdf$zsquared>10 & zdf$zsquared<100,]
+
+
+#To subset the zdf dataframe to only include the values on row 26
+subset(zdf[26,])
+
+#To subset the zdf dataframe to only include the values in the column zsquared in the 180th row.
+zdf$zsquared[zdf$zvec==180]
+```
+
+Link to my Github repository: https://github.com/mamata2423/ReproducibilityClass/blob/main/CodingChallenge1.R
+
+
+
+
+5.	5 pts. Download the Tips.csv file from Canvas. Use the read.csv() function to read the data into R so that the missing values are properly coded. **Note the missing values are reported in the data as a period (i.e., “.”). How do you know the data were read correctly? 
+
+
+```{r}
+read.csv("/Users/Mamata/Downloads/TipsR.csv",na.strings=".")
+```
+
+I used na.strings option to tell R that missing values in my data are denoted as "." and when I load my data, NA appears instead of "." in the missing value, we know the data is read correctly.

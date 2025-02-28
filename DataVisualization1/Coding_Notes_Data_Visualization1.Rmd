@@ -1,0 +1,277 @@
+---
+title: "Coding Notes Data Visualization 1"
+author: "Mamata K C"
+date: "2025-02-13"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+Basic data visualization in R
+```{r}
+#new datasetmtcars
+data("mtcars")
+
+#To look at structure of data
+str(mtcars)
+
+#scatterplot
+plot(mtcars$wt,mtcars$mpg)
+
+#to make plots more fancy, give labels, font size etc
+plot(mtcars$wt,mtcars$mpg,
+     xlab="Car Weight",
+     ylab="Miles per gallon",
+     font.lab=10,
+     pch=23)
+```
+
+```{r}
+####GGPLOT######
+
+
+#load ggplot package
+library(ggplot2)
+
+#ggplot function
+ggplot()
+
+#generate ggplot (empty plot without any points because ggplot is based on concept of layers so layers need to be added)
+ggplot(mtcars, aes(x = wt, y = mpg))
+
+##adding layers and data to the plot
+# + will add layer to the plot and layer is usually called geom_something such as geom_point, geom_smooth
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() + 
+  geom_smooth()
+
+#with in layers,it has many options
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point() + 
+  geom_smooth(method = lm, se = FALSE) 
+
+
+###order of layers can be changed
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point() 
+
+##label x and y axes
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point() +
+  xlab("Weight") + 
+  ylab("Miles per gallon")
+
+## make point size based on weight by two ways
+
+#1. by applying it in main aesthetic (it will generate warning message as it implies to all layers of ggplot)
+ggplot(mtcars, aes(x = wt, y = mpg, size = wt)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point () +
+  xlab("Weight") + 
+  ylab("Miles per gallon")
+
+
+#2. Instead apply to only one layer
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point(aes(size = wt)) +
+  xlab("Weight") + 
+  ylab("Miles per gallon")
+
+# add color to points
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point(aes(size = wt),color=("orange")) +
+  xlab("Weight") + 
+  ylab("Miles per gallon")
+
+
+# change color according to weight
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point(aes(size = wt,color=(wt))) +
+  xlab("Weight") + 
+  ylab("Miles per gallon")
+
+
+##  can also change size of points and color according to other variables however interpretation can get complicated
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point(aes(size = cyl,color=(hp))) +
+  xlab("Weight") + 
+  ylab("Miles per gallon")
+
+#Color gradients
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point(aes(color = wt)) +
+  xlab("Weight") + 
+  ylab("Miles per gallon") +
+  scale_colour_gradient(low = "salmon", high = "darkblue")
+
+#Scale
+
+#log10
+###change labels for x axis
+##automatically applies log10 to x-axis
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point(aes(color = wt)) +
+  xlab("log10 Weight") + 
+  ylab("Miles per gallon") +
+  scale_colour_gradient(low = "salmon", high = "darkblue")+
+  scale_x_log10()  
+  
+# scale: percentage 
+##divide y by 100 for correct percentage  
+##converts y axis to percentage
+ggplot(mtcars, aes(x = wt, y = mpg/100)) +
+  geom_smooth(method = lm, se = FALSE) +
+  geom_point(aes(color = wt)) +
+  xlab("Weight") + 
+  ylab("Miles per gallon") +
+  scale_colour_gradient(low = "salmon", high = "darkblue")+
+  scale_y_continuous(labels = scales::percent) 
+```
+
+```{r}
+####CATEGORICAL AND NUMERIC #####
+
+#load data
+bull.richness <- read.csv("/Users/Mamata/Downloads/Bull_richness.csv")
+str(bull.richness)
+
+#subset to soy data
+bull.richness.soy.no.till <- bull.richness[bull.richness$Crop == "Soy" & 
+                                     bull.richness$Treatment == "No-till",]
+
+
+#BoxPlot
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  geom_boxplot() 
+
+#with labels
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  geom_boxplot() + 
+  xlab("") + 
+  ylab("Bulleribasidiaceae richness") 
+
+#problem with this type of visualization is they don't show all of the data points
+
+#adding layer to show all the data points
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  geom_boxplot() + 
+  xlab("") + 
+  ylab("Bulleribasidiaceae richness") +
+  geom_point(position=position_jitterdodge(dodge.width=0.9)) 
+
+## dodge is basically placing bars or box plots side by side instead of stacking them and jitter_dodge overlay points in more or less in random fashion so that the points are not overlapping and all points are visible
+
+##if not dodge
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  geom_boxplot() + 
+  xlab("") + 
+  ylab("Bulleribasidiaceae richness") +
+  geom_point() 
+
+##if not jitterdodge
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  geom_boxplot() + 
+  xlab("") + 
+  ylab("Bulleribasidiaceae richness") +
+  geom_point(position=position_dodge(width=0.9)) 
+```
+```{r}
+### BARCHART ###
+
+# barplots
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  stat_summary(fun=mean,geom="bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar") + 
+  xlab("") + 
+  ylab("Bulleribasidiaceae richness") +
+  geom_point(position=position_jitterdodge(dodge.width=0.9)) 
+
+
+## We got overlapping bars so we need to dodge the bars
+
+# Dodge bars and error bars
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide)) + 
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") + 
+  xlab("") + 
+  ylab("Bulleribasidiaceae richness")
+
+
+# It gives nice figure but bar fill doesnot look good
+
+# Difference between color and fill 
+## Color controls outside color such as color of error bars, points, bars, lines
+## Fill actually fills the bar with different color
+
+# to change colors of bar filled and error bars, points
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, color = Fungicide, fill = Fungicide)) + 
+  stat_summary(fun=mean,geom="bar", position = "dodge") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", position = "dodge") + 
+  xlab("") + 
+  ylab("Bulleribasidiaceae richness")
+```
+
+
+
+
+```{r}
+### Lines connnecting ####
+
+##Lines
+
+## we use group function which means that we are going to treat fungicide as main grouping variable for this data
+ggplot(bull.richness.soy.no.till, aes(x = GrowthStage, y = richness, group = Fungicide, color = Fungicide)) + 
+  stat_summary(fun=mean,geom="line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+  ylab("Bulleribasidiaceae \n richness") + 
+  xlab("") 
+
+## Faceting
+
+# facet wrap for making multiple plots for same variable but split by categorical variable 
+ggplot(bull.richness, aes(x = GrowthStage, y = richness, group = Fungicide, color = Fungicide)) + 
+  stat_summary(fun=mean,geom="line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+  ylab("Bulleribasidiaceae \n richness") + 
+  xlab("") +
+  facet_wrap(~Treatment)
+
+# for interaction
+ggplot(bull.richness, aes(x = GrowthStage, y = richness, group = Fungicide, color = Fungicide)) + 
+  stat_summary(fun=mean,geom="line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+  ylab("Bulleribasidiaceae \n richness") + 
+  xlab("") +
+  facet_wrap(~Treatment*Crop)
+
+# Problem is it shows all the variables in X axis that doesnot have data as well
+
+# to solve the problem 
+ggplot(bull.richness, aes(x = GrowthStage, y = richness, group = Fungicide, color = Fungicide)) + 
+  stat_summary(fun=mean,geom="line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+  ylab("Bulleribasidiaceae \n richness") + 
+  xlab("") +
+  facet_wrap(~Treatment*Crop, scales = "free")
+
+# change the order of facet
+ggplot(bull.richness, aes(x = GrowthStage, y = richness, group = Fungicide, color = Fungicide)) + 
+  stat_summary(fun=mean,geom="line") +
+  stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.5) +
+  ylab("Bulleribasidiaceae \n richness") + 
+  xlab("") +
+  facet_wrap(~Crop*Treatment, scales = "free")
+```
+

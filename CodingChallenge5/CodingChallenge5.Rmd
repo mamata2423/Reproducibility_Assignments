@@ -1,15 +1,13 @@
 ---
-title: "CodingChallenge5"
+title: "Coding Challenge 5"
 author: "Mamata K C"
 date: "2025-03-20"
-output: 
-  pdf_document:
-    toc: true
+output:
   md_document:
     variant: gfm
-  html_document:
+  pdf_document:
     toc: true
-    toc_float: true
+  
 ---
 
 Data wrangling – 25 pts
@@ -41,6 +39,8 @@ Metadata
 ```{r}
 library(tidyverse) 
 library(ggplot2)
+library(knitr)
+library(markdown)
 alpha <- left_join(DiversityData, Metadata, by = "Code") #combining two dataframes together by common column "Code".
 alpha
 

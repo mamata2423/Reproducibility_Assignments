@@ -593,7 +593,7 @@ alpha_average2 %>%
   pivot_longer(c(diff.cotton.even, diff.soybean.even), names_to = "diff") %>%  #transforming wide format data to long format creating a new column named diff that contains the values from diff.cotton.even and diff.soybean.even
   ggplot(aes(x= Time_Point, y = value, color = diff))+ #creating a line graph with time point as x axis and value as y axis and color by diff
   geom_line()+
-  xlab("Time(hrs")+ #labeling x axis
+  xlab("Time(hrs)")+ #labeling x axis
   ylab("Difference from soil in Pielou's evenness") #labeling y axis
 ```
 

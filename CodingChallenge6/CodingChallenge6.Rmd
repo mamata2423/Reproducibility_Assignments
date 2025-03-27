@@ -1,0 +1,190 @@
+---
+title: "CodingChallenge6"
+author: "Mamata K C"
+date: "2025-03-27"
+output:
+  pdf_document:
+    toc: true
+  md_document:
+    variant: gfm
+---
+
+
+Loops and iterations – 25 pts
+
+PLEASE READ THIS BEFORE CONTINUING
+
+This assignment will help you practice writing and executing for loops and writing functions. It will also involve some more practice with GitHub. You may collaborate with a partner to enhance your learning experience. Please ensure the following:
+
+•	Collaboration: If you work with a partner, include both names on the final submission by editing the YAML header.
+•	Submission: Only one person should submit the assignment to Canvas in a Word document or .pdf file generated through R markdown. Additionally, you should provide a link to your GitHub, where the assignment should be viewable by rendering it as a GitHub-flavored markdown file. 
+•	Setup: It is also assumed you already have a GitHub repository for this class. 
+•	Time: This should take you no longer than the class period to complete. 
+
+# 1.	2 pts. Regarding reproducibility, what is the main point of writing your own functions and iterations? 
+
+- We can compute the same calculations R using the mathematical formula and copy pasting the formula multiple times and just changing the value of the variable. However, in case of complicated calculations, we might do mistakes during copying and pasting process and there occurs problem in reproducibility. Further, it is also a long and tedious process for a large set of data. Thus, creating our own function to do the calculations and use iterations to do same calculation multiple times for different data helps in reproducing our analysis. 
+
+
+# 2.	2 pts. In your own words, describe how to write a function and a for loop in R and how they work. Give me specifics like syntax, where to write code, and how the results are returned. 
+
+## Function
+
+- to write a function, we name the function first and use function() function where we write the input data that we want to change. Then we write the formula inside the curly brackets, where we can also save the name of the formula and return the name of the formula inside the curly brackets as output.
+
+for example: NameFunction <- function(inputdata){
+NameFormula <- (formula)
+return(NameFormula)
+}
+
+The above code will take the input data and perform the calculation using the formula we write down and give us the output.
+
+## for loop
+
+- for loop sets up iteration
+- while running for loop, it takes every data from the input data and runs the code that we give it inside curly brackets until all the input values are covered and gives us the output.
+
+for example: for (i in 1:100) {
+result <- NameFunction(i)
+print(result)
+}
+
+- The above code takes all numbers from 1 to 100, performs the calculation using the function that we created above for all of them and gives output.
+
+
+
+This dataset contains the population and coordinates (latitude and longitude) of the 40 most populous cities in the US, along with Auburn, AL. Your task is to create a function that calculates the distance between Auburn and each other city using the Haversine formula. To do this, you'll write a for loop that goes through each city in the dataset and computes the distance from Auburn. Detailed steps are provided below.
+
+# 3.	2 pts. Read in the Cities.csv file from Canvas using a relative file path.
+
+```{r}
+cities <- read.csv("Cities.csv") #  loading file using relative file path
+cities 
+```
+
+
+
+# 4.	6 pts. Write a function to calculate the distance between two pairs of coordinates based on the Haversine formula (see below). The input into the function should be lat1, lon1, lat2, and lon2. The function should return the object distance_km. All the code below needs to go into the function.
+
+convert to radians
+rad.lat1 <- lat1 * pi/180
+rad.lon1 <- lon1 * pi/180
+rad.lat2 <- lat2 * pi/180
+rad.lon2 <- lon2 * pi/180
+
+
+Haversine formula
+delta_lat <- rad.lat2 - rad.lat1
+delta_lon <- rad.lon2 - rad.lon1
+a <- sin(delta_lat / 2)^2 + cos(rad.lat1) * cos(rad.lat2) * sin(delta_lon / 2)^2
+c <- 2 * asin(sqrt(a)) 
+
+Earth's radius in kilometers
+earth_radius <- 6378137
+
+Calculate the distance
+distance_km <- (earth_radius * c)/1000
+
+
+```{r}
+# writing a function to calculate distance between two coordinates
+
+haversine_distance <- function(lat1, lon1, lat2, lon2) {
+  rad.lat1 <- lat1 * pi/180 #converting to radians
+  rad.lon1 <- lon1 * pi/180
+  rad.lat2 <- lat2 * pi/180
+  rad.lon2 <- lon2 * pi/180
+  delta_lat <- rad.lat2 - rad.lat1
+  delta_lon <- rad.lon2 - rad.lon1
+  a <- sin(delta_lat / 2)^2 + cos(rad.lat1) * cos(rad.lat2) * sin(delta_lon / 2)^2
+  c <- 2 * asin(sqrt(a))  #haversine formula
+  earth_radius <- 6378137 #earth's radius in kilometers
+  distance_km <- (earth_radius * c)/1000 #calculating the distance
+  return(distance_km)
+}
+```
+
+
+
+# 5.	5 pts. Using your function, compute the distance between Auburn, AL and New York City 
+a.	Subset/filter the Cities.csv data to include only the latitude and longitude values you need and input as input to your function. 
+
+```{r}
+# Subsetting required values of latitude and longitude values
+
+lat1 <- cities$lat[cities$city == "Auburn"] 
+lon1 <- cities$long[cities$city == "Auburn"]
+lat2 <- cities$lat[cities$city == "New York"]
+lon2 <- cities$long[cities$city == "New York"]
+
+# Using the function to compute distance between Auburn and New York City.
+DistanceAuburnNYC <- haversine_distance(lat1, lon1, lat2, lon2)
+print(DistanceAuburnNYC)
+```
+
+
+b.	The output of your function should be 1367.854 km
+
+
+
+
+# 6.	6 pts. Now, use your function within a for loop to calculate the distance between all other cities in the data. The output of the first 9 iterations is shown below. 
+[1] 1367.854
+[1] 3051.838
+[1] 1045.521
+[1] 916.4138
+[1] 993.0298
+[1] 1056.022
+[1] 1239.973
+[1] 162.5121
+[1] 1036.99
+
+
+```{r}
+lat2 <- cities$lat[cities$city!="Auburn"]  #subsetting data for lattitudes for all cities except Auburn
+lon2 <- cities$long[cities$city!="Auburn"] #subsetting data for longitudes for all cities except Auburn
+
+#for loop to calculate the distance between all other cities and Auburn
+for (i in seq_along(lat2)){
+  result <- haversine_distance(lat1, lon1, lat2[i], lon2[i])
+  print(result)
+}
+```
+
+
+
+# Bonus point if you can have the output of each iteration append a new row to a dataframe, generating a new column of data. In other words, the loop should create a dataframe with three columns called city1, city2, and distance_km, as shown below. The first six rows of the dataframe are shown below.
+
+       City1  City2 Distance_km
+1    New York Auburn   1367.8540
+2 Los Angeles Auburn   3051.8382
+3     Chicago Auburn   1045.5213
+4       Miami Auburn    916.4138
+5     Houston Auburn    993.0298
+6      Dallas Auburn   1056.0217
+
+```{r}
+
+CitiesDistance = NULL #creating a NULL object
+
+#for loop to calculate the distance between all other cities and Auburn
+for (i in seq_along(lat2)) {
+  result <- haversine_distance(lat1, lon1, lat2[i], lon2[i])
+  City1 <- cities$city[i]   #creating a vector City1 with all other cities
+  City2 <- "Auburn"   #creating a vector City2 with city Auburn
+  CombinedData <- data.frame(City1 = City1, City2 = City2, Distance_km = result)
+  CitiesDistance <- rbind.data.frame(CitiesDistance, CombinedData) 
+}
+
+
+CitiesDistance
+
+```
+
+
+
+# 7.	2 pts. Commit and push a gfm .md file to GitHub inside a directory called Coding Challenge 6. Provide me a link to your github written as a clickable link in your .pdf or .docx
+
+
+
+[Link to my GitHub](https://github.com/mamata2423/Reproducibility_Assignments.git)

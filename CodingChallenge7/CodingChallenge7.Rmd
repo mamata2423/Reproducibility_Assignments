@@ -3,13 +3,13 @@ title: "CodingChallenge7_LinearModels"
 author: "Mamata K C"
 date: "2025-04-03"
 output:
+  pdf_document:
+    toc: true
   html_document:
     toc: true
     df_print: paged
   md_document:
     variant: gfm
-  pdf_document:
-    toc: true
 ---
 
 

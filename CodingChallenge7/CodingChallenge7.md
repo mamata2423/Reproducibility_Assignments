@@ -104,13 +104,14 @@ datum$Rep <- as.factor(datum$Rep) #setting Rep as factor
 # 2. 5 pts. Fit a linear model to predict Emergence using Treatment and DaysAfterPlanting along with the interaction. Provide the summary of the linear model and ANOVA results.
 
 ``` r
-lm1 <- lm(Emergence~Treatment*DaysAfterPlanting, data = datum)
+lm1 <- lm(Emergence~Treatment+DaysAfterPlanting+Treatment:DaysAfterPlanting, data = datum) #running linear model
 summary(lm1)
 ```
 
     ## 
     ## Call:
-    ## lm(formula = Emergence ~ Treatment * DaysAfterPlanting, data = datum)
+    ## lm(formula = Emergence ~ Treatment + DaysAfterPlanting + Treatment:DaysAfterPlanting, 
+    ##     data = datum)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
@@ -162,7 +163,7 @@ summary(lm1)
     ## F-statistic: 71.21 on 35 and 108 DF,  p-value: < 2.2e-16
 
 ``` r
-anova(lm1)
+anova(lm1) #anova
 ```
 
     ## Analysis of Variance Table
@@ -182,8 +183,8 @@ No, we don’t need to fit the interaction term in the linear model
 because interaction was found to be non significant.
 
 ``` r
-lm_model <- lm(Emergence~Treatment+DaysAfterPlanting, data = datum)
-summary(lm_model)
+lm2 <- lm(Emergence~Treatment+DaysAfterPlanting, data = datum)
+summary(lm2)
 ```
 
     ## 
@@ -216,7 +217,25 @@ summary(lm_model)
     ## F-statistic: 273.6 on 11 and 132 DF,  p-value: < 2.2e-16
 
 ``` r
-anova(lm_model)
+confint(lm2)
+```
+
+    ##                           2.5 %      97.5 %
+    ## (Intercept)          176.631133  187.695256
+    ## Treatment2          -141.306614 -127.755886
+    ## Treatment3             2.974636   16.525364
+    ## Treatment4            -4.056614    9.494114
+    ## Treatment5             3.943386   17.494114
+    ## Treatment6             2.037136   15.587864
+    ## Treatment7            -8.962864    4.587864
+    ## Treatment8             0.974636   14.525364
+    ## Treatment9            -4.775364    8.775364
+    ## DaysAfterPlanting14    5.205313   14.239132
+    ## DaysAfterPlanting21    6.788646   15.822465
+    ## DaysAfterPlanting28    6.427535   15.461354
+
+``` r
+anova(lm2)
 ```
 
     ## Analysis of Variance Table
@@ -229,10 +248,15 @@ anova(lm_model)
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
+Interpretation: Intercept: Estimated emergence for Treatment 1 at day 7
+is 182.163. Coeficient for Treatment 2: We found that Treatment 2 has
+134.531 (+-6.77;+-95%C.I.) plants lesser emergence than the Treatment 1
+(p value \< 2e-16).
+
 # 4. 5 pts. Calculate the least square means for Treatment using the emmeans package and perform a Tukey separation with the compact letter display using the cld function. Interpret the results.
 
 ``` r
-lsmeans <- emmeans(lm_model, ~Treatment) 
+lsmeans <- emmeans(lm2, ~Treatment) 
 Results_lsmeans <- cld(lsmeans, alpha = 0.05, reversed = TRUE, details = TRUE)
 Results_lsmeans
 ```
@@ -299,6 +323,12 @@ Results_lsmeans
     ## Results are averaged over the levels of: DaysAfterPlanting 
     ## P value adjustment: tukey method for comparing a family of 9 estimates
 
+Interpretation: least squared means are the means estimated by linear
+model. According the result, Treatment 2 is significantly different from
+all other Treatments. Treatment 7 is significantly different from
+Treamtents 3, 5 and 6. All other remaining treatments 1, 3, 4, 5, 6, 8,
+9 are not significantly different from each other.
+
 # 5. 4 pts. The provided function lets you dynamically add a linear model plus one factor from that model and plots a bar chart with letters denoting treatment differences. Use this model to generate the plot shown below. Explain the significance of the letters.
 
 ``` r
@@ -337,6 +367,21 @@ plot_cldbars_onefactor <- function(lm_model, factor) {
   
   return(plot)
 }
+
+plot_cldbars_onefactor(lm2,"Treatment")
 ```
 
+![](CodingChallenge7_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+
+Significance of letters: Letter c denotes Treatment 2 is significantly
+different from all other Treatments as they have letters a or ab.
+Treatment 7 has letter b which means it is significantly different from
+Treamtents 3, 5 and 6 as they have letters a. However, it is not
+significantly different from Treatments 1, 4, 8, 9 as they have letter
+ab. All other remaining treatments 1, 3, 4, 5, 6, 8, 9 are not
+significantly different from each other.
+
 # 6. 2 pts. Generate the gfm .md file along with a .html, .docx, or .pdf. Commit, and push the .md file to github and turn in the .html, .docx, or .pdf to Canvas. Provide me a link here to your github.
+
+[Link to my
+GitHub](https://github.com/mamata2423/Reproducibility_Assignments.git)
